@@ -106,8 +106,15 @@
             <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
         </Link>
         <PostBuildEvent>
-            <Message>Copying $(TargetFileName) to $(SolutionDir)Run...</Message>
-            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"</Command>
+            <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
+            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"
+                if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" (
+                "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" (
+                powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else (
+                echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
+                )</Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,8 +136,15 @@
             <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
         </Link>
         <PostBuildEvent>
-            <Message>Copying $(TargetFileName) to $(SolutionDir)Run...</Message>
-            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"</Command>
+            <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
+            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"
+                if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" (
+                "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" (
+                powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else (
+                echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
+                )</Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -141,6 +155,7 @@
             <ConformanceMode>true</ConformanceMode>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <AdditionalIncludeDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalIncludeDirectories>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
         </ClCompile>
         <Link>
             <SubSystem>Windows</SubSystem>
@@ -148,8 +163,15 @@
             <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
         </Link>
         <PostBuildEvent>
-            <Message>Copying $(TargetFileName) to $(SolutionDir)Run...</Message>
-            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"</Command>
+            <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
+            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"
+                if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" (
+                "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" (
+                powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else (
+                echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
+                )</Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -171,8 +193,15 @@
             <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
         </Link>
         <PostBuildEvent>
-            <Message>Copying $(TargetFileName) to $(SolutionDir)Run...</Message>
-            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"</Command>
+            <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
+            <Command>xcopy /Y /F /I "$(TargetPath)" "$(SolutionDir)Run"
+                if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" (
+                "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.bat" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else if exist "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" (
+                powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
+                ) else (
+                echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
+                )</Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemGroup>
@@ -203,20 +232,20 @@
         <ClInclude Include="Prop.hpp"/>
     </ItemGroup>
     <ItemGroup>
-      <Content Include="..\..\Run\.enigma\assets\default\resource_type_category" />
-      <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii-1920_1.png" />
-      <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii_opaque.png" />
-      <Content Include="..\..\Run\.enigma\assets\default\textures\gui\cat.png" />
-      <Content Include="..\..\Run\.enigma\assets\default\textures\gui\pot_gui.png" />
-      <Content Include="..\..\Run\.enigma\assets\default\textures\module" />
-      <Content Include="..\..\Run\.enigma\assets\default\textures\test\Caizii.png" />
-      <Content Include="..\..\Run\.enigma\assets\default\textures\test\TestUV.png" />
-      <Content Include="..\..\Run\.enigma\assets\namespace" />
-      <Content Include="..\..\Run\.enigma\config\GameConfig.xml" />
-      <Content Include="..\..\Run\.enigma\data\Audio\Click.mp3" />
-      <Content Include="..\..\Run\.enigma\data\Fonts\CaiziiFixedFont" />
-      <Content Include="..\..\Run\.enigma\data\Fonts\SquirrelFixedFont" />
-      <Content Include="..\..\Run\.enigma\data\GameConfig.xml" />
+        <Content Include="..\..\Run\.enigma\assets\default\resource_type_category" />
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii-1920_1.png" />
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii_opaque.png" />
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\cat.png" />
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\pot_gui.png" />
+        <Content Include="..\..\Run\.enigma\assets\default\textures\module" />
+        <Content Include="..\..\Run\.enigma\assets\default\textures\test\Caizii.png" />
+        <Content Include="..\..\Run\.enigma\assets\default\textures\test\TestUV.png" />
+        <Content Include="..\..\Run\.enigma\assets\namespace" />
+        <Content Include="..\..\Run\.enigma\config\GameConfig.xml" />
+        <Content Include="..\..\Run\.enigma\data\Audio\Click.mp3" />
+        <Content Include="..\..\Run\.enigma\data\Fonts\CaiziiFixedFont" />
+        <Content Include="..\..\Run\.enigma\data\Fonts\SquirrelFixedFont" />
+        <Content Include="..\..\Run\.enigma\data\GameConfig.xml" />
     </ItemGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
     <ImportGroup Label="ExtensionTargets">
