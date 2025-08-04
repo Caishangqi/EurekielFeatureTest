@@ -5,6 +5,12 @@
 class Window;
 class Game;
 
+// Forward declaration for resource system
+namespace enigma::resource
+{
+    class ResourceSubsystem;
+}
+
 extern Window* g_theWindow;
 
 class App
@@ -48,6 +54,9 @@ public:
     Rgba8 m_backgroundColor  = Rgba8(63, 63, 63, 255);
 
     AABB2 m_consoleSpace;
+    
+    // Resource system
+    enigma::resource::ResourceSubsystem* m_resourceSubsystem = nullptr;
 
     STATIC bool WindowCloseEvent(EventArgs& args);
 };

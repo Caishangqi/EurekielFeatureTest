@@ -13,6 +13,10 @@
 #include "Engine/Renderer/DebugRenderSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
+// Resource system integration
+#include "Engine/Resource/ResourceSubsystem.hpp"
+#include "Engine/Resource/ResourceCommon.hpp"
+
 Window*                g_theWindow   = nullptr;
 IRenderer*             g_theRenderer = nullptr;
 App*                   g_theApp      = nullptr;
@@ -68,7 +72,24 @@ void App::Startup(char*)
     g_theDevConsole = new DevConsole(consoleConfig);
 
     AudioSystemConfig audioConfig;
+    audioConfig.enableResourceIntegration = true;
     g_theAudio = new AudioSystem(audioConfig);
+
+    // Initialize resource system
+    enigma::resource::ResourceConfig resourceConfig;
+    resourceConfig.baseAssetPath = ".enigma/assets";
+    resourceConfig.enableHotReload = true;
+    resourceConfig.logResourceLoads = true;
+    resourceConfig.printScanResults = true;
+    
+    // Add custom namespaces
+    resourceConfig.AddNamespace("game", "game");
+    resourceConfig.AddNamespace("test", "test");
+    
+    // Enable preloading for UI sounds
+    resourceConfig.EnableNamespacePreload("engine", {"audio/ui/*"});
+    
+    m_resourceSubsystem = new enigma::resource::ResourceSubsystem(resourceConfig);
 
     g_theEventSystem->Startup();
     g_theDevConsole->Startup();
@@ -76,6 +97,12 @@ void App::Startup(char*)
     g_theWindow->Startup();
     g_theRenderer->Startup();
     DebugRenderSystemStartup(debugRenderConfig);
+    
+    // Start resource system before audio to enable resource loading
+    m_resourceSubsystem->Startup();
+    
+    // Connect audio system to resource system
+    g_theAudio->SetResourceSubsystem(m_resourceSubsystem);
     g_theAudio->Startup();
 
     g_theGame = new Game();
@@ -93,6 +120,15 @@ void App::Shutdown()
     g_theGame = nullptr;
     // Shutdown all Engine Subsystem
     g_theAudio->Shutdown();
+    
+    // Shutdown resource system
+    if (m_resourceSubsystem)
+    {
+        
+        delete m_resourceSubsystem;
+        m_resourceSubsystem = nullptr;
+    }
+    
     g_theDevConsole->Shutdown();
     DebugRenderSystemShutdown();
     g_theRenderer->Shutdown();
@@ -248,6 +284,13 @@ void App::UpdateCameras()
 
 void App::Update()
 {
+    // Update resource system for hot reload
+    if (m_resourceSubsystem)
+    {
+        m_resourceSubsystem->Update();
+    }
+
+    
     /// Cursor
     auto windowHandle   = static_cast<HWND>(g_theWindow->GetWindowHandle());
     bool windowHasFocus = (GetActiveWindow() == windowHandle);
