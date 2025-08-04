@@ -86,8 +86,8 @@ void App::Startup(char*)
     resourceConfig.AddNamespace("game", "game");
     resourceConfig.AddNamespace("test", "test");
     
-    // Enable preloading for UI sounds
-    resourceConfig.EnableNamespacePreload("engine", {"audio/ui/*"});
+    // Enable preloading for all sounds
+    resourceConfig.EnableNamespacePreload("engine", {"sounds/*"});
     
     m_resourceSubsystem = new enigma::resource::ResourceSubsystem(resourceConfig);
 
