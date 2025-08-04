@@ -18,6 +18,11 @@
 #include "Engine/Renderer/DebugRenderSystem.hpp"
 #include "Engine/Renderer/Renderer.hpp"
 
+// Resource system integration
+#include "Engine/Resource/ResourceSubsystem.hpp"
+#include "Engine/Resource/ResourceCommon.hpp"
+#include "Engine/Audio/AudioSystem.hpp"
+
 Game::Game()
 {
     /// Resource
@@ -273,6 +278,61 @@ void Game::Update()
         g_theInput->SetCursorMode(CursorMode::POINTER);
     }
 
+    // Test ResourceLocation and Sound loading
+    static bool hasTestedResources = false;
+    if (!hasTestedResources && g_theApp->m_resourceSubsystem && g_theAudio)
+    {
+        hasTestedResources = true;
+
+        // Test ResourceLocation creation (Neoforge style)
+        using namespace enigma::resource;
+
+        // Test various ResourceLocation creation methods
+        ResourceLocation loc1 = ResourceLocation::Of("engine", "sounds/mono/laser");
+        ResourceLocation loc2 = ResourceLocation::Parse("engine:sounds/mono/puff");
+        ResourceLocation loc3("engine", "sounds/stereo/error");
+
+        g_theDevConsole->AddLine(DevConsole::COLOR_INFO_MAJOR,
+                                 Stringf("Testing ResourceLocation:"));
+        g_theDevConsole->AddLine(DevConsole::COLOR_INFO_MINOR,
+                                 Stringf("  loc1: %s", loc1.ToString().c_str()));
+        g_theDevConsole->AddLine(DevConsole::COLOR_INFO_MINOR,
+                                 Stringf("  loc2: %s", loc2.ToString().c_str()));
+        g_theDevConsole->AddLine(DevConsole::COLOR_INFO_MINOR,
+                                 Stringf("  loc3: %s", loc3.ToString().c_str()));
+
+        // Test sound loading
+        ResourceLocation clickSound("engine", "audio/click");
+
+        // List available sound resources
+        auto soundResources = g_theApp->m_resourceSubsystem->ListResources("", ResourceType::SOUND);
+        g_theDevConsole->AddLine(DevConsole::COLOR_INFO_MAJOR,
+                                 Stringf("Found %d sound resources:", (int)soundResources.size()));
+
+        for (const auto& soundLoc : soundResources)
+        {
+            g_theDevConsole->AddLine(DevConsole::COLOR_INFO_MINOR,
+                                     Stringf("  %s", soundLoc.ToString().c_str()));
+        }
+
+        // Try to play a sound using correct namespace (without file extension like Minecraft Neoforge)
+        ResourceLocation testSound = ResourceLocation::Of("engine", "sounds/mono/laser");
+        g_theDevConsole->AddLine(DevConsole::COLOR_INFO_LOG,
+                                 Stringf("Attempting to play sound: %s", testSound.ToString().c_str()));
+
+        SoundPlaybackID playbackID = g_theAudio->PlaySound(testSound);
+        if (playbackID != MISSING_SOUND_ID)
+        {
+            g_theDevConsole->AddLine(DevConsole::COLOR_INFO_LOG,
+                                     "Sound playback started successfully!");
+        }
+        else
+        {
+            g_theDevConsole->AddLine(DevConsole::COLOR_ERROR,
+                                     "Failed to start sound playback");
+        }
+    }
+
     /// Player
     m_player->Update(Clock::GetSystemClock().GetDeltaSeconds());
     ///
@@ -326,6 +386,8 @@ void Game::HandleKeyBoardEvent(float deltaTime)
 {
     UNUSED(deltaTime)
     const XboxController& controller = g_theInput->GetController(0);
+
+
     if (m_isInMainMenu)
     {
         bool spaceBarPressed = g_theInput->WasKeyJustPressed(32);
@@ -334,6 +396,12 @@ void Game::HandleKeyBoardEvent(float deltaTime)
         {
             StartGame();
         }
+    }
+
+    if (g_theInput->WasKeyJustPressed('K'))
+    {
+        using namespace enigma::resource;
+        g_theAudio->PlaySound(ResourceLocation::Of("engine", "sounds/mono/laser"));
     }
 
     if (g_theInput->WasKeyJustPressed(KEYCODE_ESC) || controller.WasButtonJustPressed(XBOX_BUTTON_BACK))
