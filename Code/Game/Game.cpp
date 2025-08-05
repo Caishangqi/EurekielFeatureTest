@@ -347,6 +347,7 @@ void Game::HandleKeyBoardEvent(float deltaTime)
     {
         using namespace enigma::resource;
         g_theAudio->PlaySound(ResourceLocation::Of("engine", "sounds/mono/laser"));
+        //g_theAudio->PlaySound(ResourceLocation::Parse("engine:sounds/mono/laser"));
     }
 
     if (g_theInput->WasKeyJustPressed(KEYCODE_ESC) || controller.WasButtonJustPressed(XBOX_BUTTON_BACK))
