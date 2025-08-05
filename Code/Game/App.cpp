@@ -98,12 +98,12 @@ void App::Startup(char*)
     g_theRenderer->Startup();
     DebugRenderSystemStartup(debugRenderConfig);
     
-    // Start resource system before audio to enable resource loading
-    m_resourceSubsystem->Startup();
-    
-    // Connect audio system to resource system
+    // Connect audio system to resource system first (before ResourceSubsystem startup)
     g_theAudio->SetResourceSubsystem(m_resourceSubsystem);
     g_theAudio->Startup();
+    
+    // Start resource system after audio system registers its SoundLoader
+    m_resourceSubsystem->Startup();
 
     g_theGame = new Game();
     g_rng     = new RandomNumberGenerator();
@@ -118,16 +118,15 @@ void App::Shutdown()
     // Destroy the game
     delete g_theGame;
     g_theGame = nullptr;
-    // Shutdown all Engine Subsystem
-    g_theAudio->Shutdown();
     
-    // Shutdown resource system
+    // Shutdown resource system first (releases all SoundResource objects)
     if (m_resourceSubsystem)
     {
-        
-        delete m_resourceSubsystem;
-        m_resourceSubsystem = nullptr;
+        m_resourceSubsystem->Shutdown();
     }
+    
+    // Then shutdown AudioSystem (releases FMOD system)
+    g_theAudio->Shutdown();
     
     g_theDevConsole->Shutdown();
     DebugRenderSystemShutdown();
@@ -136,6 +135,9 @@ void App::Shutdown()
     g_theInput->Shutdown();
     g_theEventSystem->Shutdown();
     // Destroy all Engine Subsystem
+    delete m_resourceSubsystem;
+    m_resourceSubsystem = nullptr;
+    
     delete g_theAudio;
     g_theAudio = nullptr;
 
