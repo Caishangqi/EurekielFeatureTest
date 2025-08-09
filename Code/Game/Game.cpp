@@ -21,7 +21,7 @@
 // Resource system integration
 #include "Engine/Resource/ResourceSubsystem.hpp"
 #include "Engine/Resource/ResourceCommon.hpp"
-#include "Engine/Audio/AudioSystem.hpp"
+#include "Engine/Audio/AudioSubsystem.hpp"
 
 Game::Game()
 {

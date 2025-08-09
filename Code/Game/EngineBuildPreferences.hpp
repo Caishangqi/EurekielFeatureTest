@@ -8,7 +8,7 @@
 //	Downside: ALL games must now have this Code/Game/EngineBuildPreferences.hpp file.
 //
 
-//#define ENGINE_DISABLE_AUDIO	// (If uncommented) Disables AudioSystem code and fmod linkage.
+//#define ENGINE_DISABLE_AUDIO	// (If uncommented) Disables AudioSubsystem code and fmod linkage.
 
 #if defined(_DEBUG)
 #define  ENGINE_DEBUG_RENDER
