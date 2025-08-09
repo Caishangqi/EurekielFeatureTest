@@ -54,9 +54,6 @@ public:
     Rgba8 m_backgroundColor  = Rgba8(63, 63, 63, 255);
 
     AABB2 m_consoleSpace;
-    
-    // Resource system
-    enigma::resource::ResourceSubsystem* m_resourceSubsystem = nullptr;
 
     STATIC bool WindowCloseEvent(EventArgs& args);
 };

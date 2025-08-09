@@ -2,7 +2,7 @@
 
 #include "Engine/Window/Window.hpp"
 #include "Game.hpp"
-#include "Engine/Audio/AudioSystem.hpp"
+#include "Engine/Audio/AudioSubsystem.hpp"
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/EventSystem.hpp"
@@ -17,13 +17,14 @@
 #include "Engine/Resource/ResourceSubsystem.hpp"
 #include "Engine/Resource/ResourceCommon.hpp"
 
-Window*                g_theWindow   = nullptr;
-IRenderer*             g_theRenderer = nullptr;
-App*                   g_theApp      = nullptr;
-RandomNumberGenerator* g_rng         = nullptr;
-InputSystem*           g_theInput    = nullptr;
-AudioSystem*           g_theAudio    = nullptr;
-Game*                  g_theGame     = nullptr;
+Window*                              g_theWindow   = nullptr;
+IRenderer*                           g_theRenderer = nullptr;
+App*                                 g_theApp      = nullptr;
+RandomNumberGenerator*               g_rng         = nullptr;
+InputSystem*                         g_theInput    = nullptr;
+AudioSubsystem*                         g_theAudio    = nullptr;
+Game*                                g_theGame     = nullptr;
+enigma::resource::ResourceSubsystem* g_theResource = nullptr;
 
 App::App()
 {
@@ -35,6 +36,8 @@ App::~App()
 
 void App::Startup(char*)
 {
+    using namespace enigma::resource;
+
     // Load Game Config
     LoadGameConfig(".enigma/config/GameConfig.xml");
     m_consoleSpace.m_mins = Vec2::ZERO;
@@ -71,25 +74,21 @@ void App::Startup(char*)
     consoleConfig.m_camera->SetOrthographicView(m_consoleSpace.m_mins, m_consoleSpace.m_maxs);
     g_theDevConsole = new DevConsole(consoleConfig);
 
-    AudioSystemConfig audioConfig;
-    audioConfig.enableResourceIntegration = true;
-    g_theAudio = new AudioSystem(audioConfig);
-
     // Initialize resource system
-    enigma::resource::ResourceConfig resourceConfig;
-    resourceConfig.baseAssetPath = ".enigma/assets";
-    resourceConfig.enableHotReload = true;
+    ResourceConfig resourceConfig;
+    resourceConfig.baseAssetPath    = ".enigma/assets";
+    resourceConfig.enableHotReload  = true;
     resourceConfig.logResourceLoads = true;
     resourceConfig.printScanResults = true;
-    
-    // Add custom namespaces
-    resourceConfig.AddNamespace("game", "game");
-    resourceConfig.AddNamespace("test", "test");
-    
-    // Enable preloading for all sounds
-    resourceConfig.EnableNamespacePreload("engine", {"sounds/*"});
-    
-    m_resourceSubsystem = new enigma::resource::ResourceSubsystem(resourceConfig);
+    resourceConfig.AddNamespace("game", "game"); // Add custom namespaces
+    resourceConfig.AddNamespace("test", "test"); // Add custom namespaces
+    resourceConfig.EnableNamespacePreload("engine", {"sounds/*"}); // Enable preloading for all sounds
+    g_theResource = new ResourceSubsystem(resourceConfig);
+
+    AudioSystemConfig audioConfig;
+    audioConfig.enableResourceIntegration = true;
+    audioConfig.resourceSubsystem         = g_theResource;
+    g_theAudio                            = new AudioSubsystem(audioConfig);
 
     g_theEventSystem->Startup();
     g_theDevConsole->Startup();
@@ -97,13 +96,8 @@ void App::Startup(char*)
     g_theWindow->Startup();
     g_theRenderer->Startup();
     DebugRenderSystemStartup(debugRenderConfig);
-    
-    // Connect audio system to resource system first (before ResourceSubsystem startup)
-    g_theAudio->SetResourceSubsystem(m_resourceSubsystem);
     g_theAudio->Startup();
-    
-    // Start resource system after audio system registers its SoundLoader
-    m_resourceSubsystem->Startup();
+    g_theResource->Startup(); // Start resource system after audio system registers its SoundLoader
 
     g_theGame = new Game();
     g_rng     = new RandomNumberGenerator();
@@ -118,26 +112,26 @@ void App::Shutdown()
     // Destroy the game
     delete g_theGame;
     g_theGame = nullptr;
-    
+
     // Shutdown resource system first (releases all SoundResource objects)
-    if (m_resourceSubsystem)
-    {
-        m_resourceSubsystem->Shutdown();
-    }
-    
-    // Then shutdown AudioSystem (releases FMOD system)
+    g_theResource->Shutdown();
+
+
+    // Then shutdown AudioSubsystem (releases FMOD system)
     g_theAudio->Shutdown();
-    
+
     g_theDevConsole->Shutdown();
     DebugRenderSystemShutdown();
     g_theRenderer->Shutdown();
     g_theWindow->Shutdown();
     g_theInput->Shutdown();
     g_theEventSystem->Shutdown();
+
+
     // Destroy all Engine Subsystem
-    delete m_resourceSubsystem;
-    m_resourceSubsystem = nullptr;
-    
+    delete g_theResource;
+    g_theResource = nullptr;
+
     delete g_theAudio;
     g_theAudio = nullptr;
 
@@ -287,12 +281,8 @@ void App::UpdateCameras()
 void App::Update()
 {
     // Update resource system for hot reload
-    if (m_resourceSubsystem)
-    {
-        m_resourceSubsystem->Update();
-    }
+    g_theResource->Update();
 
-    
     /// Cursor
     auto windowHandle   = static_cast<HWND>(g_theWindow->GetWindowHandle());
     bool windowHasFocus = (GetActiveWindow() == windowHandle);
