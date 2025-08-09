@@ -4,6 +4,11 @@
 /// Whether or not enable cosmic circle (developer)
 #define COSMIC
 
+namespace enigma::resource
+{
+    class ResourceSubsystem;
+}
+
 struct Vertex_PCU;
 struct Rgba8;
 struct Vec2;
@@ -12,15 +17,17 @@ class App;
 class RandomNumberGenerator;
 class IRenderer;
 class InputSystem;
-class AudioSystem;
+class AudioSubsystem;
 class Game;
 
-extern RandomNumberGenerator* g_rng;
-extern App*                   g_theApp;
-extern IRenderer*              g_theRenderer;
-extern InputSystem*           g_theInput;
-extern AudioSystem*           g_theAudio;
-extern Game*                  g_theGame;
+
+extern RandomNumberGenerator*               g_rng;
+extern App*                                 g_theApp;
+extern IRenderer*                           g_theRenderer;
+extern InputSystem*                         g_theInput;
+extern AudioSubsystem*                         g_theAudio;
+extern Game*                                g_theGame;
+extern enigma::resource::ResourceSubsystem* g_theResource;
 
 constexpr float WORLD_SIZE_X   = 200.f;
 constexpr float WORLD_SIZE_Y   = 100.f;
