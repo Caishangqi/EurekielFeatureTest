@@ -22,6 +22,7 @@
 #include "Engine/Resource/ResourceSubsystem.hpp"
 #include "Engine/Resource/ResourceCommon.hpp"
 #include "Engine/Audio/AudioSubsystem.hpp"
+#include "Engine/Core/Yaml.hpp"
 
 Game::Game()
 {
@@ -167,6 +168,11 @@ Game::Game()
 
     /// Game State
     g_theInput->SetCursorMode(CursorMode::POINTER);
+
+    using enigma::core::YamlConfiguration;
+    YamlConfiguration config = YamlConfiguration::LoadFromFile(".enigma/config/engine/module.yml");
+    std::string       test   = config.GetString("moduleConfig.logger.globalLogLevel");
+    
 }
 
 Game::~Game()
