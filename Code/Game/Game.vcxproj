@@ -103,7 +103,8 @@
         <Link>
             <SubSystem>Windows</SubSystem>
             <GenerateDebugInformation>true</GenerateDebugInformation>
-            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
+            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/;$(SolutionDir)Run</AdditionalLibraryDirectories>
+            <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
         <PostBuildEvent>
             <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
@@ -133,7 +134,8 @@
             <EnableCOMDATFolding>true</EnableCOMDATFolding>
             <OptimizeReferences>true</OptimizeReferences>
             <GenerateDebugInformation>true</GenerateDebugInformation>
-            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
+            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/;$(SolutionDir)Run</AdditionalLibraryDirectories>
+            <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
         <PostBuildEvent>
             <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
@@ -160,7 +162,8 @@
         <Link>
             <SubSystem>Windows</SubSystem>
             <GenerateDebugInformation>true</GenerateDebugInformation>
-            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
+            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/;$(SolutionDir)Run</AdditionalLibraryDirectories>
+            <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
         <PostBuildEvent>
             <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
@@ -190,7 +193,8 @@
             <EnableCOMDATFolding>true</EnableCOMDATFolding>
             <OptimizeReferences>true</OptimizeReferences>
             <GenerateDebugInformation>true</GenerateDebugInformation>
-            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/</AdditionalLibraryDirectories>
+            <AdditionalLibraryDirectories>$(SolutionDir)Code/;$(SolutionDir)../Engine/Code/;$(SolutionDir)Run</AdditionalLibraryDirectories>
+            <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
         <PostBuildEvent>
             <Message>Copying $(TargetFileName) and Engine resources to $(SolutionDir)Run...</Message>
