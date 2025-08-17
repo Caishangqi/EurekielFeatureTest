@@ -7,6 +7,7 @@
 #include "Engine/Core/EngineCommon.hpp"
 #include "Engine/Core/EventSystem.hpp"
 #include "Engine/Core/Rgba8.hpp"
+#include "Engine/Core/Engine.hpp"
 #include "Engine/Input/InputSystem.hpp"
 #include "Engine/Math/RandomNumberGenerator.hpp"
 #include "Engine/Renderer/Camera.hpp"
@@ -22,12 +23,14 @@ IRenderer*                           g_theRenderer = nullptr;
 App*                                 g_theApp      = nullptr;
 RandomNumberGenerator*               g_rng         = nullptr;
 InputSystem*                         g_theInput    = nullptr;
-AudioSubsystem*                         g_theAudio    = nullptr;
+AudioSubsystem*                      g_theAudio    = nullptr;
 Game*                                g_theGame     = nullptr;
 enigma::resource::ResourceSubsystem* g_theResource = nullptr;
 
 App::App()
 {
+    // Create Engine instance
+    enigma::core::Engine::CreateInstance();
 }
 
 App::~App()
@@ -74,7 +77,10 @@ void App::Startup(char*)
     consoleConfig.m_camera->SetOrthographicView(m_consoleSpace.m_mins, m_consoleSpace.m_maxs);
     g_theDevConsole = new DevConsole(consoleConfig);
 
-    // Initialize resource system
+    // Register Engine subsystems
+    using namespace enigma::resource;
+
+    // Create ResourceSubsystem with configuration
     ResourceConfig resourceConfig;
     resourceConfig.baseAssetPath    = ".enigma/assets";
     resourceConfig.enableHotReload  = true;
@@ -83,12 +89,20 @@ void App::Startup(char*)
     resourceConfig.AddNamespace("game", "game"); // Add custom namespaces
     resourceConfig.AddNamespace("test", "test"); // Add custom namespaces
     resourceConfig.EnableNamespacePreload("engine", {"sounds/*"}); // Enable preloading for all sounds
-    g_theResource = new ResourceSubsystem(resourceConfig);
 
+    auto resourceSubsystem = std::make_unique<ResourceSubsystem>(resourceConfig);
+    GEngine->RegisterSubsystem(std::move(resourceSubsystem));
+
+    // Create AudioSubsystem with configuration
     AudioSystemConfig audioConfig;
     audioConfig.enableResourceIntegration = true;
-    audioConfig.resourceSubsystem         = g_theResource;
-    g_theAudio                            = new AudioSubsystem(audioConfig);
+    audioConfig.resourceSubsystem         = resourceSubsystem.get();
+    auto audioSubsystem                   = std::make_unique<AudioSubsystem>(audioConfig);
+    GEngine->RegisterSubsystem(std::move(audioSubsystem));
+
+    // Set up global pointers for legacy compatibility
+    g_theResource = GEngine->GetSubsystem<ResourceSubsystem>();
+    g_theAudio    = GEngine->GetSubsystem<AudioSubsystem>();
 
     g_theEventSystem->Startup();
     g_theDevConsole->Startup();
@@ -96,8 +110,9 @@ void App::Startup(char*)
     g_theWindow->Startup();
     g_theRenderer->Startup();
     DebugRenderSystemStartup(debugRenderConfig);
-    g_theAudio->Startup();
-    g_theResource->Startup(); // Start resource system after audio system registers its SoundLoader
+
+    // Start Engine subsystems
+    GEngine->Startup();
 
     g_theGame = new Game();
     g_rng     = new RandomNumberGenerator();
@@ -113,12 +128,12 @@ void App::Shutdown()
     delete g_theGame;
     g_theGame = nullptr;
 
-    // Shutdown resource system first (releases all SoundResource objects)
-    g_theResource->Shutdown();
+    // Shutdown Engine subsystems (handles ResourceSubsystem and AudioSubsystem)
+    GEngine->Shutdown();
 
-
-    // Then shutdown AudioSubsystem (releases FMOD system)
-    g_theAudio->Shutdown();
+    // Clear global pointers (Engine manages the objects now)
+    g_theResource = nullptr;
+    g_theAudio    = nullptr;
 
     g_theDevConsole->Shutdown();
     DebugRenderSystemShutdown();
@@ -127,14 +142,7 @@ void App::Shutdown()
     g_theInput->Shutdown();
     g_theEventSystem->Shutdown();
 
-
-    // Destroy all Engine Subsystem
-    delete g_theResource;
-    g_theResource = nullptr;
-
-    delete g_theAudio;
-    g_theAudio = nullptr;
-
+    // Destroy remaining Engine Subsystems (not managed by Engine yet)
     delete g_theDevConsole;
     g_theDevConsole = nullptr;
 
@@ -149,6 +157,9 @@ void App::Shutdown()
 
     delete g_theEventSystem;
     g_theEventSystem = nullptr;
+
+    // Destroy Engine instance
+    enigma::core::Engine::DestroyInstance();
 }
 
 void App::RunFrame()
