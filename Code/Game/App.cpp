@@ -18,6 +18,9 @@
 #include "Engine/Resource/ResourceSubsystem.hpp"
 #include "Engine/Resource/ResourceCommon.hpp"
 
+// Logger system integration
+#include "Engine/Core/Logger/Logger.hpp"
+
 Window*                              g_theWindow   = nullptr;
 IRenderer*                           g_theRenderer = nullptr;
 App*                                 g_theApp      = nullptr;
@@ -78,7 +81,12 @@ void App::Startup(char*)
     g_theDevConsole = new DevConsole(consoleConfig);
 
     // Register Engine subsystems
+    using namespace enigma::core;
     using namespace enigma::resource;
+
+    // Create and register LoggerSubsystem first (highest priority)
+    auto logger = std::make_unique<LoggerSubsystem>();
+    GEngine->RegisterSubsystem(std::move(logger));
 
     // Create ResourceSubsystem with configuration
     ResourceConfig resourceConfig;
@@ -113,6 +121,36 @@ void App::Startup(char*)
 
     // Start Engine subsystems
     GEngine->Startup();
+
+    // Configure Logger subsystem after startup
+    using namespace enigma::core;
+    LoggerSubsystem* loggerSubsystem = GEngine->GetLogger();
+    if (loggerSubsystem)
+    {
+        // Add appenders
+        loggerSubsystem->AddAppender(std::make_unique<ConsoleAppender>(true));
+        loggerSubsystem->AddAppender(std::make_unique<DevConsoleAppender>());
+        loggerSubsystem->AddAppender(std::make_unique<FileAppender>("Run/game.log", true));
+
+        // Set log levels
+        loggerSubsystem->SetGlobalLogLevel(LogLevel::DEBUG);
+        loggerSubsystem->SetCategoryLogLevel("Engine", LogLevel::INFO);
+
+        // Test basic logging functionality using new elegant API
+        LogInfo("App", "Logger system initialized and configured");
+        LogDebug("App", "Debug logging is enabled");
+        LogWarn("App", "This is a warning message");
+        LogError("App", "This is an error message (for testing)");
+        
+        // Test formatted logging with same function name
+        LogInfo("App", "Screen resolution: %dx%d",
+                static_cast<int>(g_gameConfigBlackboard.GetValue("screenSizeX", 1600.f)),
+                static_cast<int>(g_gameConfigBlackboard.GetValue("screenSizeY", 800.f)));
+                
+        // Test category-specific convenience functions
+        LogEngineInfo("Engine subsystem started successfully");
+        LogGameInfo("Game initialization starting...");
+    }
 
     g_theGame = new Game();
     g_rng     = new RandomNumberGenerator();
