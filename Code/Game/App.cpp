@@ -122,22 +122,20 @@ void App::Startup(char*)
     // Start Engine subsystems
     GEngine->Startup();
 
-    // Configure Logger subsystem after startup
+    // Test Logger subsystem after automatic configuration
     using namespace enigma::core;
     LoggerSubsystem* loggerSubsystem = GEngine->GetLogger();
     if (loggerSubsystem)
     {
-        // Add appenders
-        loggerSubsystem->AddAppender(std::make_unique<ConsoleAppender>(true));
-        loggerSubsystem->AddAppender(std::make_unique<DevConsoleAppender>());
-        loggerSubsystem->AddAppender(std::make_unique<FileAppender>("Run/game.log", true));
-
-        // Set log levels
-        loggerSubsystem->SetGlobalLogLevel(LogLevel::DEBUG);
-        loggerSubsystem->SetCategoryLogLevel("Engine", LogLevel::INFO);
+        // LoggerSubsystem now automatically creates appenders based on configuration
+        // No need to manually add appenders - they're created in CreateDefaultAppenders()
+        
+        // Log levels are also set automatically from configuration, but we can override if needed
+        // loggerSubsystem->SetGlobalLogLevel(LogLevel::DEBUG);
+        // loggerSubsystem->SetCategoryLogLevel("Engine", LogLevel::INFO);
 
         // Test basic logging functionality using new elegant API
-        LogInfo("App", "Logger system initialized and configured");
+        LogInfo("App", "Logger system initialized and configured automatically");
         LogDebug("App", "Debug logging is enabled");
         LogWarn("App", "This is a warning message");
         LogError("App", "This is an error message (for testing)");
