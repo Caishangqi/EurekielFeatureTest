@@ -21,6 +21,9 @@
 // Logger system integration
 #include "Engine/Core/Logger/Logger.hpp"
 
+// Console system integration
+#include "Engine/Core/Console/ConsoleSubsystem.hpp"
+
 Window*                              g_theWindow   = nullptr;
 IRenderer*                           g_theRenderer = nullptr;
 App*                                 g_theApp      = nullptr;
@@ -88,6 +91,10 @@ void App::Startup(char*)
     auto logger = std::make_unique<LoggerSubsystem>();
     GEngine->RegisterSubsystem(std::move(logger));
 
+    // Create and register ConsoleSubsystem (high priority, after logger)
+    auto consoleSubsystem = std::make_unique<ConsoleSubsystem>();
+    GEngine->RegisterSubsystem(std::move(consoleSubsystem));
+
     // Create ResourceSubsystem with configuration
     ResourceConfig resourceConfig;
     resourceConfig.baseAssetPath    = ".enigma/assets";
@@ -113,14 +120,15 @@ void App::Startup(char*)
     g_theAudio    = GEngine->GetSubsystem<AudioSubsystem>();
 
     g_theEventSystem->Startup();
+    
+    // Start Engine subsystems first (includes ConsoleSubsystem)
+    GEngine->Startup();
+    
     g_theDevConsole->Startup();
     g_theInput->Startup();
     g_theWindow->Startup();
     g_theRenderer->Startup();
     DebugRenderSystemStartup(debugRenderConfig);
-
-    // Start Engine subsystems
-    GEngine->Startup();
 
     // Test Logger subsystem after automatic configuration
     using namespace enigma::core;
@@ -148,6 +156,42 @@ void App::Startup(char*)
         // Test category-specific convenience functions
         LogEngineInfo("Engine subsystem started successfully");
         LogGameInfo("Game initialization starting...");
+    }
+
+    // Test Console subsystem
+    auto* console = GEngine->GetSubsystem<enigma::core::ConsoleSubsystem>();
+    if (console) {
+        LogInfo("App", "ConsoleSubsystem found, initialized: %s", console->IsInitialized() ? "true" : "false");
+        
+        if (console->IsInitialized()) {
+            LogInfo("App", "Console is external active: %s", console->IsExternalConsoleActive() ? "true" : "false");
+            LogInfo("App", "Console is visible: %s", console->IsVisible() ? "true" : "false");
+            
+            // Force show console and test output
+            LogInfo("App", "Calling SetVisible(true)...");
+            console->SetVisible(true);
+            
+            LogInfo("App", "After SetVisible - Console is external active: %s", console->IsExternalConsoleActive() ? "true" : "false");
+            LogInfo("App", "After SetVisible - Console is visible: %s", console->IsVisible() ? "true" : "false");
+            
+            LogInfo("App", "Writing test messages to console...");
+            
+            // Test intelligent output routing
+            console->WriteLine("=== Console Output Mode Test ===", enigma::core::LogLevel::INFO);
+#ifdef _DEBUG
+            console->WriteLine("DEBUG BUILD: In debug mode with debugger attached, this should appear in IDE Console", enigma::core::LogLevel::INFO);
+            console->WriteLineColored("DEBUG BUILD: Colored text test (may not show colors in IDE)", Rgba8::GREEN);
+#else
+            console->WriteLine("RELEASE BUILD: This should appear in External Console window", enigma::core::LogLevel::INFO);
+            console->WriteLineColored("RELEASE BUILD: Colored text test", Rgba8::GREEN);
+#endif
+            console->WriteLineColored("Press \\ to show External Console window", Rgba8::YELLOW);
+            console->WriteLine("Press ~ to toggle DevConsole (rendered in-game)", enigma::core::LogLevel::INFO);
+            console->WriteLine("Type commands in External Console - they forward to DevConsole", enigma::core::LogLevel::INFO);
+            console->WriteLine("=== End Test Messages ===", enigma::core::LogLevel::INFO);
+        }
+    } else {
+        LogError("App", "ConsoleSubsystem not found!");
     }
 
     g_theGame = new Game();
@@ -327,6 +371,15 @@ void App::UpdateCameras()
 
 void App::Update()
 {
+    // Calculate delta time
+    static float lastTime = 0.0f;
+    float currentTime = Clock::GetSystemClock().GetTotalSeconds();
+    float deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+    
+    // Update Engine subsystems (including ConsoleSubsystem)
+    GEngine->Update(deltaTime);
+    
     // Update resource system for hot reload
     g_theResource->Update();
 
