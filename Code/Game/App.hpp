@@ -31,7 +31,7 @@ public:
 
     /// Event Handle
     static bool Event_ConsoleStartup(EventArgs& args);
-    /// 
+    
 private:
     void BeginFrame();
     void UpdateCameras();

@@ -24,6 +24,10 @@
 // Console system integration
 #include "Engine/Core/Console/ConsoleSubsystem.hpp"
 
+// Register system integration  
+#include "Engine/Register/RegisterSubsystem.hpp"
+#include "Test/Test_Registrables.hpp"
+
 Window*                              g_theWindow   = nullptr;
 IRenderer*                           g_theRenderer = nullptr;
 App*                                 g_theApp      = nullptr;
@@ -95,6 +99,14 @@ void App::Startup(char*)
     auto consoleSubsystem = std::make_unique<ConsoleSubsystem>();
     GEngine->RegisterSubsystem(std::move(consoleSubsystem));
 
+    // Create and register RegisterSubsystem (after console, before resource)
+    RegisterConfig registerConfig;
+    registerConfig.enableEvents     = true;
+    registerConfig.threadSafe       = true;
+    registerConfig.enableNamespaces = true;
+    auto registerSubsystem          = std::make_unique<RegisterSubsystem>(registerConfig);
+    GEngine->RegisterSubsystem(std::move(registerSubsystem));
+
     // Create ResourceSubsystem with configuration
     ResourceConfig resourceConfig;
     resourceConfig.baseAssetPath    = ".enigma/assets";
@@ -120,10 +132,10 @@ void App::Startup(char*)
     g_theAudio    = GEngine->GetSubsystem<AudioSubsystem>();
 
     g_theEventSystem->Startup();
-    
+
     // Start Engine subsystems first (includes ConsoleSubsystem)
     GEngine->Startup();
-    
+
     g_theDevConsole->Startup();
     g_theInput->Startup();
     g_theWindow->Startup();
@@ -137,7 +149,7 @@ void App::Startup(char*)
     {
         // LoggerSubsystem now automatically creates appenders based on configuration
         // No need to manually add appenders - they're created in CreateDefaultAppenders()
-        
+
         // Log levels are also set automatically from configuration, but we can override if needed
         // loggerSubsystem->SetGlobalLogLevel(LogLevel::DEBUG);
         // loggerSubsystem->SetCategoryLogLevel("Engine", LogLevel::INFO);
@@ -147,12 +159,12 @@ void App::Startup(char*)
         LogDebug("App", "Debug logging is enabled");
         LogWarn("App", "This is a warning message");
         LogError("App", "This is an error message (for testing)");
-        
+
         // Test formatted logging with same function name
         LogInfo("App", "Screen resolution: %dx%d",
                 static_cast<int>(g_gameConfigBlackboard.GetValue("screenSizeX", 1600.f)),
                 static_cast<int>(g_gameConfigBlackboard.GetValue("screenSizeY", 800.f)));
-                
+
         // Test category-specific convenience functions
         LogEngineInfo("Engine subsystem started successfully");
         LogGameInfo("Game initialization starting...");
@@ -160,22 +172,24 @@ void App::Startup(char*)
 
     // Test Console subsystem
     auto* console = GEngine->GetSubsystem<enigma::core::ConsoleSubsystem>();
-    if (console) {
+    if (console)
+    {
         LogInfo("App", "ConsoleSubsystem found, initialized: %s", console->IsInitialized() ? "true" : "false");
-        
-        if (console->IsInitialized()) {
+
+        if (console->IsInitialized())
+        {
             LogInfo("App", "Console is external active: %s", console->IsExternalConsoleActive() ? "true" : "false");
             LogInfo("App", "Console is visible: %s", console->IsVisible() ? "true" : "false");
-            
+
             // Force show console and test output
             LogInfo("App", "Calling SetVisible(true)...");
             console->SetVisible(true);
-            
+
             LogInfo("App", "After SetVisible - Console is external active: %s", console->IsExternalConsoleActive() ? "true" : "false");
             LogInfo("App", "After SetVisible - Console is visible: %s", console->IsVisible() ? "true" : "false");
-            
+
             LogInfo("App", "Writing test messages to console...");
-            
+
             // Test intelligent output routing
             console->WriteLine("=== Console Output Mode Test ===", enigma::core::LogLevel::INFO);
 #ifdef _DEBUG
@@ -190,9 +204,14 @@ void App::Startup(char*)
             console->WriteLine("Type commands in External Console - they forward to DevConsole", enigma::core::LogLevel::INFO);
             console->WriteLine("=== End Test Messages ===", enigma::core::LogLevel::INFO);
         }
-    } else {
+    }
+    else
+    {
         LogError("App", "ConsoleSubsystem not found!");
     }
+
+    // Test RegisterSubsystem
+    RunTest_Registrables();
 
     g_theGame = new Game();
     g_rng     = new RandomNumberGenerator();
@@ -372,14 +391,14 @@ void App::UpdateCameras()
 void App::Update()
 {
     // Calculate delta time
-    static float lastTime = 0.0f;
-    float currentTime = Clock::GetSystemClock().GetTotalSeconds();
-    float deltaTime = currentTime - lastTime;
-    lastTime = currentTime;
-    
+    static float lastTime    = 0.0f;
+    float        currentTime = Clock::GetSystemClock().GetTotalSeconds();
+    float        deltaTime   = currentTime - lastTime;
+    lastTime                 = currentTime;
+
     // Update Engine subsystems (including ConsoleSubsystem)
     GEngine->Update(deltaTime);
-    
+
     // Update resource system for hot reload
     g_theResource->Update();
 
