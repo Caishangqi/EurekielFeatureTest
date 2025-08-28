@@ -115,7 +115,8 @@
                 powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
                 ) else (
                 echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
-                )</Command>
+                )
+            </Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,7 +147,8 @@
                 powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
                 ) else (
                 echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
-                )</Command>
+                )
+            </Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -174,7 +176,8 @@
                 powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
                 ) else (
                 echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
-                )</Command>
+                )
+            </Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -205,7 +208,8 @@
                 powershell -ExecutionPolicy Bypass -File "$(SolutionDir)..\Engine\Scripts\CopyEngineResources.ps1" "$(SolutionDir)..\Engine\.enigma" "$(SolutionDir)Run\.enigma"
                 ) else (
                 echo [WARNING] Engine resource copy script not found, skipping Engine resource copy
-                )</Command>
+                )
+            </Command>
         </PostBuildEvent>
     </ItemDefinitionGroup>
     <ItemGroup>
@@ -214,10 +218,11 @@
         </ProjectReference>
     </ItemGroup>
     <ItemGroup>
-        <Content Include="..\..\Run\.enigma\data\Shaders\BlinnPhong.hlsl" />
-        <Content Include="..\..\Run\.enigma\data\Shaders\Default.hlsl" />
-        <Content Include="..\..\Run\.enigma\data\Shaders\Default2D.hlsl" />
-        <Content Include="..\..\Run\.enigma\data\Shaders\Diffuse.hlsl" />
+
+        <Content Include="..\..\Run\.enigma\data\Shaders\BlinnPhong.hlsl"/>
+        <Content Include="..\..\Run\.enigma\data\Shaders\Default.hlsl"/>
+        <Content Include="..\..\Run\.enigma\data\Shaders\Default2D.hlsl"/>
+        <Content Include="..\..\Run\.enigma\data\Shaders\Diffuse.hlsl"/>
         <ClCompile Include="Player.cpp"/>
         <ClCompile Include="Prop.cpp"/>
         <ClCompile Include="App.cpp"/>
@@ -225,6 +230,7 @@
         <ClCompile Include="Game.cpp"/>
         <ClCompile Include="GameCommon.cpp"/>
         <ClCompile Include="Main_Windows.cpp"/>
+        <ClCompile Include="Test\Test_Registrables.cpp" />
     </ItemGroup>
     <ItemGroup>
         <ClInclude Include="App.hpp"/>
@@ -234,22 +240,23 @@
         <ClInclude Include="GameCommon.hpp"/>
         <ClInclude Include="Player.hpp"/>
         <ClInclude Include="Prop.hpp"/>
+        <ClInclude Include="Test\Test_Registrables.hpp" />
     </ItemGroup>
     <ItemGroup>
-        <Content Include="..\..\Run\.enigma\assets\default\resource_type_category" />
-        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii-1920_1.png" />
-        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii_opaque.png" />
-        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\cat.png" />
-        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\pot_gui.png" />
-        <Content Include="..\..\Run\.enigma\assets\default\textures\module" />
-        <Content Include="..\..\Run\.enigma\assets\default\textures\test\Caizii.png" />
-        <Content Include="..\..\Run\.enigma\assets\default\textures\test\TestUV.png" />
-        <Content Include="..\..\Run\.enigma\assets\namespace" />
-        <Content Include="..\..\Run\.enigma\config\GameConfig.xml" />
-        <Content Include="..\..\Run\.enigma\data\Audio\Click.mp3" />
-        <Content Include="..\..\Run\.enigma\data\Fonts\CaiziiFixedFont" />
-        <Content Include="..\..\Run\.enigma\data\Fonts\SquirrelFixedFont" />
-        <Content Include="..\..\Run\.enigma\data\GameConfig.xml" />
+        <Content Include="..\..\Run\.enigma\assets\default\resource_type_category"/>
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii-1920_1.png"/>
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\Caizii_opaque.png"/>
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\cat.png"/>
+        <Content Include="..\..\Run\.enigma\assets\default\textures\gui\pot_gui.png"/>
+        <Content Include="..\..\Run\.enigma\assets\default\textures\module"/>
+        <Content Include="..\..\Run\.enigma\assets\default\textures\test\Caizii.png"/>
+        <Content Include="..\..\Run\.enigma\assets\default\textures\test\TestUV.png"/>
+        <Content Include="..\..\Run\.enigma\assets\namespace"/>
+        <Content Include="..\..\Run\.enigma\config\GameConfig.xml"/>
+        <Content Include="..\..\Run\.enigma\data\Audio\Click.mp3"/>
+        <Content Include="..\..\Run\.enigma\data\Fonts\CaiziiFixedFont"/>
+        <Content Include="..\..\Run\.enigma\data\Fonts\SquirrelFixedFont"/>
+        <Content Include="..\..\Run\.enigma\data\GameConfig.xml"/>
     </ItemGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
     <ImportGroup Label="ExtensionTargets">
