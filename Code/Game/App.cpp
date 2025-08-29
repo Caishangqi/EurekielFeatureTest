@@ -28,6 +28,10 @@
 #include "Engine/Register/RegisterSubsystem.hpp"
 #include "Test/Test_Registrables.hpp"
 
+// Atlas system integration
+#include "Test/Test_AtlasSystem.hpp"
+#include "Engine/Resource/Atlas/ImageLoader.hpp"
+
 Window*                              g_theWindow   = nullptr;
 IRenderer*                           g_theRenderer = nullptr;
 App*                                 g_theApp      = nullptr;
@@ -113,11 +117,17 @@ void App::Startup(char*)
     resourceConfig.enableHotReload  = true;
     resourceConfig.logResourceLoads = true;
     resourceConfig.printScanResults = true;
-    resourceConfig.AddNamespace("game", "game"); // Add custom namespaces
-    resourceConfig.AddNamespace("test", "test"); // Add custom namespaces
+    resourceConfig.AddNamespace("game", ""); // Add custom namespaces - will resolve to .enigma/assets/game
+    resourceConfig.AddNamespace("test", ""); // Add custom namespaces - will resolve to .enigma/assets/test
+    resourceConfig.AddNamespace("featuretest", ""); // Add featuretest namespace for Atlas testing - will resolve to .enigma/assets/featuretest
     resourceConfig.EnableNamespacePreload("engine", {"sounds/*"}); // Enable preloading for all sounds
 
     auto resourceSubsystem = std::make_unique<ResourceSubsystem>(resourceConfig);
+    
+    // Register ImageLoader before starting up ResourceSubsystem
+    auto imageLoader = std::make_shared<ImageLoader>();
+    resourceSubsystem->RegisterLoader(imageLoader);
+    
     GEngine->RegisterSubsystem(std::move(resourceSubsystem));
 
     // Create AudioSubsystem with configuration
@@ -212,6 +222,9 @@ void App::Startup(char*)
 
     // Test RegisterSubsystem
     RunTest_Registrables();
+
+    // Test AtlasSystem
+    RunTest_AtlasSystem();
 
     g_theGame = new Game();
     g_rng     = new RandomNumberGenerator();

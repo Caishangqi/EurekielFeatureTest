@@ -231,6 +231,7 @@
         <ClCompile Include="GameCommon.cpp"/>
         <ClCompile Include="Main_Windows.cpp"/>
         <ClCompile Include="Test\Test_Registrables.cpp" />
+        <ClCompile Include="Test\Test_AtlasSystem.cpp" />
     </ItemGroup>
     <ItemGroup>
         <ClInclude Include="App.hpp"/>
@@ -241,6 +242,7 @@
         <ClInclude Include="Player.hpp"/>
         <ClInclude Include="Prop.hpp"/>
         <ClInclude Include="Test\Test_Registrables.hpp" />
+        <ClInclude Include="Test\Test_AtlasSystem.hpp" />
     </ItemGroup>
     <ItemGroup>
         <Content Include="..\..\Run\.enigma\assets\default\resource_type_category"/>
