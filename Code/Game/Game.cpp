@@ -24,6 +24,13 @@
 #include "Engine/Audio/AudioSubsystem.hpp"
 #include "Engine/Core/Yaml.hpp"
 
+// ImGui system integration
+#include "Engine/Core/ImGui/ImGuiSubsystem.hpp"
+#include "ThirdParty/imgui/imgui.h"
+
+// Logger system integration
+#include "Engine/Core/Logger/Logger.hpp"
+
 Game::Game()
 {
     /// Resource
@@ -172,7 +179,24 @@ Game::Game()
     using enigma::core::YamlConfiguration;
     YamlConfiguration config = YamlConfiguration::LoadFromFile(".enigma/config/engine/module.yml");
     std::string       test   = config.GetString("moduleConfig.logger.globalLogLevel");
-    
+
+    // Register ImGui Demo window
+    using namespace enigma::core;
+    auto* imguiSub = GEngine->GetSubsystem<ImGuiSubsystem>();
+    if (imguiSub)
+    {
+        imguiSub->RegisterWindow("ImGuiDemo", [this]() {
+            if (m_showImGuiDemo)
+            {
+                ImGui::ShowDemoWindow(&m_showImGuiDemo);
+            }
+        });
+        LogInfo("Game", "ImGui Demo window registered - Press F1 to toggle visibility");
+    }
+    else
+    {
+        LogError("Game", "Failed to get ImGuiSubsystem - Demo window not registered");
+    }
 }
 
 Game::~Game()
@@ -338,6 +362,14 @@ void Game::HandleKeyBoardEvent(float deltaTime)
     UNUSED(deltaTime)
     const XboxController& controller = g_theInput->GetController(0);
 
+
+    // F1 - Toggle ImGui Demo window
+    if (g_theInput->WasKeyJustPressed(0x70))  // VK_F1 = 0x70
+    {
+        m_showImGuiDemo = !m_showImGuiDemo;
+        using namespace enigma::core;
+        LogInfo("Game", "ImGui Demo window %s", m_showImGuiDemo ? "shown" : "hidden");
+    }
 
     if (m_isInMainMenu)
     {

@@ -21,13 +21,12 @@ class AudioSubsystem;
 class Game;
 
 
-extern RandomNumberGenerator*               g_rng;
-extern App*                                 g_theApp;
-extern IRenderer*                           g_theRenderer;
-extern InputSystem*                         g_theInput;
-extern AudioSubsystem*                         g_theAudio;
-extern Game*                                g_theGame;
-extern enigma::resource::ResourceSubsystem* g_theResource;
+extern RandomNumberGenerator* g_rng;
+extern App*                   g_theApp;
+extern IRenderer*             g_theRenderer;
+extern InputSystem*           g_theInput;
+extern AudioSubsystem*        g_theAudio;
+extern Game*                  g_theGame;
 
 constexpr float WORLD_SIZE_X   = 200.f;
 constexpr float WORLD_SIZE_Y   = 100.f;

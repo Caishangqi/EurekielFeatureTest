@@ -73,6 +73,10 @@ public:
     std::vector<Prop*> m_grid_y_unit_1;
     /// 
 
+    /// ImGui Demo Window
+    bool m_showImGuiDemo = true;  // Toggle ImGui Demo window (F1 to toggle)
+    ///
+
     /// Display Only
 private:
 #ifdef COSMIC

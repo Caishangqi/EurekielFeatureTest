@@ -24,22 +24,27 @@
 // Console system integration
 #include "Engine/Core/Console/ConsoleSubsystem.hpp"
 
-// Register system integration  
-#include "Engine/Register/RegisterSubsystem.hpp"
+// MessageLog system integration
+#include "Engine/Core/MessageLog/MessageLogSubsystem.hpp"
+
+// ImGui system integration
+#include "Engine/Core/ImGui/ImGuiSubsystem.hpp"
+
+// Register system integration
+#include "Engine/Registry/Core/RegisterSubsystem.hpp"
 #include "Test/Test_Registrables.hpp"
 
 // Atlas system integration
 #include "Test/Test_AtlasSystem.hpp"
 #include "Engine/Resource/Atlas/ImageLoader.hpp"
 
-Window*                              g_theWindow   = nullptr;
-IRenderer*                           g_theRenderer = nullptr;
-App*                                 g_theApp      = nullptr;
-RandomNumberGenerator*               g_rng         = nullptr;
-InputSystem*                         g_theInput    = nullptr;
-AudioSubsystem*                      g_theAudio    = nullptr;
-Game*                                g_theGame     = nullptr;
-enigma::resource::ResourceSubsystem* g_theResource = nullptr;
+Window*                g_theWindow   = nullptr;
+IRenderer*             g_theRenderer = nullptr;
+App*                   g_theApp      = nullptr;
+RandomNumberGenerator* g_rng         = nullptr;
+InputSystem*           g_theInput    = nullptr;
+AudioSubsystem*        g_theAudio    = nullptr;
+Game*                  g_theGame     = nullptr;
 
 App::App()
 {
@@ -81,6 +86,7 @@ void App::Startup(char*)
     renderConfig.m_backend       = RendererBackend::DirectX12;
     g_theRenderer                = IRenderer::CreateRenderer(renderConfig); // Create render
 
+
     DebugRenderConfig debugRenderConfig;
     debugRenderConfig.m_renderer = g_theRenderer;
 
@@ -103,7 +109,18 @@ void App::Startup(char*)
     auto consoleSubsystem = std::make_unique<ConsoleSubsystem>();
     GEngine->RegisterSubsystem(std::move(consoleSubsystem));
 
-    // Create and register RegisterSubsystem (after console, before resource)
+    // Create and register MessageLogSubsystem (after console, before imgui)
+    auto messageLogSubsystem = std::make_unique<MessageLogSubsystem>();
+    GEngine->RegisterSubsystem(std::move(messageLogSubsystem));
+
+    // Create and register ImGuiSubsystem (after messagelog)
+    ImGuiSubsystemConfig imguiConfig;
+    imguiConfig.renderer     = g_theRenderer;
+    imguiConfig.targetWindow = g_theWindow;
+    auto imguiSubsystem      = std::make_unique<ImGuiSubsystem>(imguiConfig);
+    GEngine->RegisterSubsystem(std::move(imguiSubsystem));
+
+    // Create and register RegisterSubsystem (after imgui, before resource)
     RegisterConfig registerConfig;
     registerConfig.enableEvents     = true;
     registerConfig.threadSafe       = true;
@@ -123,11 +140,11 @@ void App::Startup(char*)
     resourceConfig.EnableNamespacePreload("engine", {"sounds/*"}); // Enable preloading for all sounds
 
     auto resourceSubsystem = std::make_unique<ResourceSubsystem>(resourceConfig);
-    
+
     // Register ImageLoader before starting up ResourceSubsystem
     auto imageLoader = std::make_shared<ImageLoader>();
     resourceSubsystem->RegisterLoader(imageLoader);
-    
+
     GEngine->RegisterSubsystem(std::move(resourceSubsystem));
 
     // Create AudioSubsystem with configuration
@@ -143,14 +160,19 @@ void App::Startup(char*)
 
     g_theEventSystem->Startup();
 
-    // Start Engine subsystems first (includes ConsoleSubsystem)
-    GEngine->Startup();
-
-    g_theDevConsole->Startup();
+    // Startup legacy systems first (so renderer device is ready before ImGui initializes)
     g_theInput->Startup();
     g_theWindow->Startup();
-    g_theRenderer->Startup();
+    g_theRenderer->Startup(); // Must startup before GEngine to ensure device is initialized
     DebugRenderSystemStartup(debugRenderConfig);
+
+    // Now start Engine subsystems (ImGuiSubsystem::Initialize() will succeed)
+    GEngine->Startup();
+
+    // Start legacy console last
+    g_theDevConsole->Startup();
+
+    g_theImGui = GEngine->GetSubsystem<ImGuiSubsystem>();
 
     // Test Logger subsystem after automatic configuration
     using namespace enigma::core;
@@ -312,14 +334,19 @@ void App::HandleKeyBoardEvent()
         }
     }
 
-    if (g_theInput->WasKeyJustPressed(0x70))
+    // F2 - Toggle debug mode (moved from F1)
+    if (g_theInput->WasKeyJustPressed(0x71)) // VK_F2 = 0x71
     {
         m_isDebug = !m_isDebug;
     }
-    if (g_theInput->WasKeyJustPressed(0x77))
+
+    // F8 - Restart game
+    if (g_theInput->WasKeyJustPressed(0x77)) // VK_F8 = 0x77
     {
         m_isPendingRestart = true;
     }
+
+    // O - Step single frame
     if (g_theInput->WasKeyJustPressed('O'))
     {
         m_isPaused = true;
@@ -388,6 +415,10 @@ void App::AdjustForPauseAndTimeDistortion()
 void App::BeginFrame()
 {
     Clock::TickSystemClock();
+
+    // Begin Engine subsystems frame (includes ImGuiSubsystem::BeginFrame())
+    GEngine->BeginFrame();
+
     g_theInput->BeginFrame();
     g_theWindow->BeginFrame();
     g_theRenderer->BeginFrame();
@@ -443,6 +474,9 @@ void App::Render() const
     g_theRenderer->ClearScreen(Rgba8(m_backgroundColor));
     g_theGame->Render();
     g_theDevConsole->Render(m_consoleSpace);
+
+    // Render ImGui (after all other rendering)
+    g_theImGui->Render();
 }
 
 void App::EndFrame()
@@ -454,6 +488,9 @@ void App::EndFrame()
     g_theAudio->EndFrame();
     g_theEventSystem->EndFrame();
     g_theDevConsole->EndFrame();
+
+    // End Engine subsystems frame (includes ImGuiSubsystem::EndFrame())
+    GEngine->EndFrame();
 
     if (m_isPendingRestart)
     {
