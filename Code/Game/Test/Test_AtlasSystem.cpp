@@ -1,4 +1,4 @@
-#include "Test_AtlasSystem.hpp"
+﻿#include "Test_AtlasSystem.hpp"
 #include "Engine/Core/Engine.hpp"
 #include "Engine/Core/Logger/LoggerAPI.hpp"
 #include "Engine/Resource/ResourceSubsystem.hpp"
@@ -40,7 +40,7 @@ bool TestSpriteVerifier::VerifySprite(const enigma::resource::AtlasManager* mana
             return false;
         }
         
-        LogInfo("AtlasTest", "✓ Verified sprite %s: UV(%.3f,%.3f)-(%.3f,%.3f)", 
+        LogInfo("AtlasTest", "+ Verified sprite %s: UV(%.3f,%.3f)-(%.3f,%.3f)", 
                location.ToString().c_str(),
                sprite->uvMin.x, sprite->uvMin.y, sprite->uvMax.x, sprite->uvMax.y);
     }
@@ -51,7 +51,7 @@ bool TestSpriteVerifier::VerifySprite(const enigma::resource::AtlasManager* mana
             LogError("AtlasTest", "Unexpected sprite %s found (should not exist)", location.ToString().c_str());
             return false;
         }
-        LogInfo("AtlasTest", "✓ Confirmed sprite %s does not exist (as expected)", location.ToString().c_str());
+        LogInfo("AtlasTest", "+ Confirmed sprite %s does not exist (as expected)", location.ToString().c_str());
     }
     
     return true;
@@ -184,13 +184,13 @@ void RunTest_AtlasSystem()
                 blocksResult.foundSprites.push_back(sprite.location.ToString());
             }
             
-            LogInfo("App", "✓ Blocks atlas built successfully: %dx%d with %d sprites (%.1f%% efficiency)",
+            LogInfo("App", "+ Blocks atlas built successfully: %dx%d with %d sprites (%.1f%% efficiency)",
                    stats.atlasWidth, stats.atlasHeight, stats.totalSprites, stats.packingEfficiency);
         }
     }
     else
     {
-        LogError("App", "✗ Failed to build blocks atlas");
+        LogError("App", "- Failed to build blocks atlas");
     }
     
     testResults.AddAtlasResult(blocksResult);
@@ -215,13 +215,13 @@ void RunTest_AtlasSystem()
                 itemsResult.foundSprites.push_back(sprite.location.ToString());
             }
             
-            LogInfo("App", "✓ Items atlas built successfully: %dx%d with %d sprites (%.1f%% efficiency)",
+            LogInfo("App", "+ Items atlas built successfully: %dx%d with %d sprites (%.1f%% efficiency)",
                    stats.atlasWidth, stats.atlasHeight, stats.totalSprites, stats.packingEfficiency);
         }
     }
     else
     {
-        LogError("App", "✗ Failed to build items atlas");
+        LogError("App", "- Failed to build items atlas");
     }
     
     testResults.AddAtlasResult(itemsResult);
@@ -258,12 +258,12 @@ void RunTest_AtlasSystem()
         blocksExportSuccess = atlasManager->ExportAtlasToPNG("blocks", "debug/atlas_blocks.png");
         if (blocksExportSuccess)
         {
-            LogInfo("App", "✓ Blocks atlas exported to debug/atlas_blocks.png");
+            LogInfo("App", "+ Blocks atlas exported to debug/atlas_blocks.png");
             blocksResult.exportSuccess = true;
         }
         else
         {
-            LogError("App", "✗ Failed to export blocks atlas");
+            LogError("App", "- Failed to export blocks atlas");
         }
     }
     
@@ -272,12 +272,12 @@ void RunTest_AtlasSystem()
         itemsExportSuccess = atlasManager->ExportAtlasToPNG("items", "debug/atlas_items.png");
         if (itemsExportSuccess)
         {
-            LogInfo("App", "✓ Items atlas exported to debug/atlas_items.png");
+            LogInfo("App", "+ Items atlas exported to debug/atlas_items.png");
             itemsResult.exportSuccess = true;
         }
         else
         {
-            LogError("App", "✗ Failed to export items atlas");
+            LogError("App", "- Failed to export items atlas");
         }
     }
 
@@ -328,11 +328,11 @@ void RunTest_AtlasSystem()
     
     if (overallSuccess)
     {
-        LogInfo("App", "🎉 Atlas system implementation is working correctly!");
+        LogInfo("App", "+ Atlas system implementation is working correctly!");
         LogInfo("App", "Check debug/ folder for exported atlas PNG files");
     }
     else
     {
-        LogError("App", "❌ Atlas system test failed - check logs for details");
+        LogError("App", "- Atlas system test failed - check logs for details");
     }
 }

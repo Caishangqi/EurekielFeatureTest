@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Register/IRegistrable.hpp"
+#include "Engine/Registry/Core/IRegistrable.hpp"
 #include <string>
 #include <vector>
 

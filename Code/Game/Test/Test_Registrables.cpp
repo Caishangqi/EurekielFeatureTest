@@ -1,7 +1,7 @@
 #include "Test_Registrables.hpp"
 
 #include "Engine/Core/Logger/LoggerAPI.hpp"
-#include "Engine/Register/RegisterSubsystem.hpp"
+#include "Engine/Registry/Core/RegisterSubsystem.hpp"
 
 // Implementation file for TestRegistrables
 // Currently all methods are inline in the header, but this file is here
