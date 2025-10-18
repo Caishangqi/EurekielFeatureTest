@@ -1,6 +1,13 @@
 ﻿#pragma once
 #include "GameCommon.hpp"
+#include "Engine/Core/MessageLog/MessageLogUI.hpp"
+#include "Engine/Core/LogCategory/LogCategory.hpp"
 #include "Engine/Math/AABB2.hpp"
+
+// Declare game-specific log categories
+DECLARE_LOG_CATEGORY_EXTERN(LogGame);
+DECLARE_LOG_CATEGORY_EXTERN(LogPlayer);
+DECLARE_LOG_CATEGORY_EXTERN(LogAI);
 
 class Player;
 class Clock;
@@ -75,6 +82,10 @@ public:
 
     /// ImGui Demo Window
     bool m_showImGuiDemo = true;  // Toggle ImGui Demo window (F1 to toggle)
+    ///
+
+    /// MessageLog UI
+    enigma::core::MessageLogUI m_messageLogUI;  // MessageLog UI (~ to toggle)
     ///
 
     /// Display Only

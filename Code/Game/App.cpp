@@ -26,6 +26,7 @@
 
 // MessageLog system integration
 #include "Engine/Core/MessageLog/MessageLogSubsystem.hpp"
+#include "Engine/Core/MessageLog/MessageLogAppender.hpp"
 
 // ImGui system integration
 #include "Engine/Core/ImGui/ImGuiSubsystem.hpp"
@@ -106,8 +107,8 @@ void App::Startup(char*)
     GEngine->RegisterSubsystem(std::move(logger));
 
     // Create and register ConsoleSubsystem (high priority, after logger)
-    auto consoleSubsystem = std::make_unique<ConsoleSubsystem>();
-    GEngine->RegisterSubsystem(std::move(consoleSubsystem));
+    //auto consoleSubsystem = std::make_unique<ConsoleSubsystem>();
+    //GEngine->RegisterSubsystem(std::move(consoleSubsystem));
 
     // Create and register MessageLogSubsystem (after console, before imgui)
     auto messageLogSubsystem = std::make_unique<MessageLogSubsystem>();
@@ -174,9 +175,11 @@ void App::Startup(char*)
 
     g_theImGui = GEngine->GetSubsystem<ImGuiSubsystem>();
 
+    // MessageLogSubsystem now automatically registers its appender to Logger during Initialize()
+    // No manual integration needed - it handles this internally for better encapsulation
+
     // Test Logger subsystem after automatic configuration
-    using namespace enigma::core;
-    LoggerSubsystem* loggerSubsystem = GEngine->GetLogger();
+    auto* loggerSubsystem = GEngine->GetLogger();
     if (loggerSubsystem)
     {
         // LoggerSubsystem now automatically creates appenders based on configuration

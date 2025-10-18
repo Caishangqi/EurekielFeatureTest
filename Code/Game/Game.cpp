@@ -30,6 +30,12 @@
 
 // Logger system integration
 #include "Engine/Core/Logger/Logger.hpp"
+#include "Engine/Core/LogCategory/PredefinedCategories.hpp"
+
+// Define game-specific log categories
+DEFINE_LOG_CATEGORY(LogGame);
+DEFINE_LOG_CATEGORY(LogPlayer);
+DEFINE_LOG_CATEGORY(LogAI);
 
 Game::Game()
 {
@@ -185,7 +191,8 @@ Game::Game()
     auto* imguiSub = GEngine->GetSubsystem<ImGuiSubsystem>();
     if (imguiSub)
     {
-        imguiSub->RegisterWindow("ImGuiDemo", [this]() {
+        imguiSub->RegisterWindow("ImGuiDemo", [this]()
+        {
             if (m_showImGuiDemo)
             {
                 ImGui::ShowDemoWindow(&m_showImGuiDemo);
@@ -197,6 +204,7 @@ Game::Game()
     {
         LogError("Game", "Failed to get ImGuiSubsystem - Demo window not registered");
     }
+    LogError(LogGame, "Example Error");
 }
 
 Game::~Game()
@@ -364,7 +372,7 @@ void Game::HandleKeyBoardEvent(float deltaTime)
 
 
     // F1 - Toggle ImGui Demo window
-    if (g_theInput->WasKeyJustPressed(0x70))  // VK_F1 = 0x70
+    if (g_theInput->WasKeyJustPressed(0x70)) // VK_F1 = 0x70
     {
         m_showImGuiDemo = !m_showImGuiDemo;
         using namespace enigma::core;
